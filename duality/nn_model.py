@@ -4,7 +4,6 @@
 
 # which should still use a relatively lower api to do the manipulation
 import tensorflow
-
 import keras
 
 # which may be done in a batch level
