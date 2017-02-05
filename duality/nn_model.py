@@ -2,7 +2,7 @@
 
 # begin crafting the neural models
 
-# which should still use a relatively lower api to do the manipulation
+# which should still use a relatively lower-level api to do the manipulation
 import tensorflow
 import keras
 

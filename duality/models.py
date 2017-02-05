@@ -8,7 +8,8 @@
 TRAIN_PICK='train.pickle';
 TEST_PICK='test.pickle';
 VOCAB_PICK='vocab.pickle'; # for dumping training vocabulary
-REP_RULE_PICK='rule.pickle'; # for dumping  training replace rule
+REP_RULE_PICK='rule.pickle'; # for dumping training replace rule
+FREQ_DIST_PICK='freq.pickle'; # for dumping training freq list
 
 import os
 import pickle
@@ -52,17 +53,18 @@ print('finished');
 
 
 
-# recover the cleared data
+## recover the cleared data
 train_storage=open(os.path.join(DIR, TEST_PICK), mode='rb');
-# test_storage=open(os.path.join(DIR, TEST_PICK), mode='rb');
-
-
 train_set=pickle.load(train_storage);
-# test_set=pickle.load(test_storage);
-
-
 train_storage.close();
-# test_storage.close();
+
+
+test_storage=open(os.path.join(DIR, TEST_PICK), mode='rb');
+test_set=pickle.load(test_storage);
+test_storage.close();
+
+
+
 
 
 
@@ -111,46 +113,94 @@ for example, SequenceMatcher(a='yeahhhhhhhhh', b='yeah').ratio() = 0.5
 
 
 """
-def build_vocabulary(doc_set, threshold=0.8):
+def build_vocabulary(doc_set, threshold=0.8, vocab_size=10000):
     # this now more
     # the pickled data is of this form [(sent., 0| 2| 4)]
     fdist=FreqDist();
+    count=0;
+    log_times=10000;
+    total_size= len(doc_set);
     for pair in doc_set:
+        # for log
+        count+=1;
+        if(np.mod(count, log_times)):
+            print('%f finished' % (count/total_size));
         for word in semantic_clean(pair[0]):
             fdist[word]+=1;
     fdist.pprint(maxlen=50);
+    print('Begin flush freq dist into disk')
+    freq_storage=open(os.path.join(DIR, FREQ_DIST_PICK), 'wb');
+    pickle.Pickler(freq_storage).dump(fdist);
+    freq_storage.close();
+    print('End flush freq dist into disk')
+    return _build_vocabulary(fdist, threshold, vocab_size);
+
+
+def _build_vocabulary(fdist, threshold, vocab_size):
     # remove the top three and the hapaxis
     # now consider the words that
-    all_vocabs= set(fdist.keys());
-    one_times = set(fdist.hapaxes());
-    more_than_one_times = all_vocabs.difference(one_times); # should we just contain those occur more than once
+    log_times=10000;
+
+    sorted_fdist= sorted(fdist.items(), key=lambda item: -item[1]); # sort it in a decrement order
+    vocab = set([pair[0] for pair in sorted_fdist[:vocab_size]]); # choose those common words
+    hapaxes= set(fdist.keys()).difference(vocab);
+
+    print('Begin flush vocabulary into disk')
+    vocab_storage=open(os.path.join(DIR, VOCAB_PICK), 'wb');
+    pickle.Pickler(vocab_storage).dump(vocab);
+    vocab_storage.close();
+    print('End flush vocabulary into disk')
+
     replace_rule={};
+    count=0;
+    total_size= len(hapaxes);
     # the processing here can be illustrated as YEAH and YEAHHHHHH or some other variants
-    for rare in one_times:
+    for rare in hapaxes:
+        count+=1;
+        if(np.mod(count, log_times)):
+            print('%f finished' % (count/total_size));
         # do some sequence matcher here and construct some mappings
-        for vocab in more_than_one_times:
-            if(leven.jaro(rare, vocab)>=threshold and set(rare)==set(vocab)):
+        for word in vocab:
+            if(leven.jaro(rare, word)>=threshold and set(rare)==set(word)):
                 # find first one then break;
-                replace_rule[rare]=vocab;
+                replace_rule[rare]=word;
                 # and remove the word from the all_vocabs
                 try:
-                    all_vocabs.remove(rare);
+                    vocab.remove(rare);
                 except KeyError:
                     pass;
                 break;
-    return more_than_one_times, replace_rule;
+    # flush the replace rule into the disk
+    print('Begin flush replace rule into disk');
+    replace_rule_storage= open(os.path.join(DIR, REP_RULE_PICK), 'wb');
+    pickle.Pickler(replace_rule_storage).dump(replace_rule);
+    replace_rule_storage.close();
+    print('End flush replace rule into disk');
+    return vocab, replace_rule;
 
 
+
+
+
+######################## this part for building vocabulary on the training set(Never try it on your own machine, which takes a really long time) ##############
 # a global vocabulary
-vocabulary, replace_rule= build_vocabulary(train_set);
+vocabulary, replace_rule= build_vocabulary(train_set ,vocab_size=10000);
+######################## this part for building vocabulary on the training set ###################
 
-vocab_storage=open(os.path.join(DIR, VOCAB_PICK), 'wb');
-pickle.Pickler(vocab_storage).dump(vocabulary);
-vocab_storage.close();
 
-replace_rule_storage= open(os.path.join(DIR, REP_RULE_PICK), 'wb');
-pickle.Pickler(replace_rule_storage).dump(replace_rule);
-replace_rule_storage.close();
+
+# just load the vocabulary
+# vocab_storage= open(os.path.join(DIR, VOCAB_PICK), 'rb');
+# replace_rule_storage= open(os.path.join(DIR, REP_RULE_PICK), 'rb');
+#
+# vocabulary = pickle.load(vocab_storage);
+# replace_rule= pickle.load(replace_rule_storage);
+#
+# vocab_storage.close();
+# replace_rule_storage.close();
+
+
+
 
 """
 We can consider a document as (S_i), and we assume we are able to evaluate the
@@ -201,7 +251,9 @@ def sent_eval(sent, alpha=0.1):
 @param: tokens, deep cleaned
 """
 def _sent_eval(tokens, vocab, replace_rule):
-    return nn_analysis(final_clean(tokens, vocab, replace_rule));
+    outcome = final_clean(tokens, vocab, replace_rule);
+    print(outcome);
+    return nn_analysis(outcome);
 
 """
 which replaces the rare words that can be replaced and remove the rare words in a semanticly cleaned raw text
@@ -212,7 +264,7 @@ def final_clean(tokens, vocab, replace_rule):
     for index, token in enumerate(tokens):
         # replace the word with a probability
         if(not token in vocab):
-            tokens[index]=replace_rule if(token in replace_rule.keys() and np.random.rand(1)[0]>=prob) else None;
+            tokens[index]=replace_rule[token] if(token in replace_rule.keys() and np.random.rand(1)[0]>=prob) else None;
     return [x for x in tokens if x is not None];
 
 
@@ -266,7 +318,7 @@ docs=[
 'i go and you should tell me something',
 'tell me something about you',
 'never thank me',
-'I want you to hug me', # a complex case
+'i want you to hug me', # a complex case
 ]
 
 
@@ -277,3 +329,4 @@ if(__name__=='__main__'):
         print('Sentence: %s' % (doc));
         print('Sentiment Value: %f' % (value));
         print(commands);
+        print('Vocabulary Size: %d' %(len(vocabulary)))
