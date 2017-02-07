@@ -39,7 +39,7 @@ from .context import DIR
 # a sequence of tokens
 # return a value from [-1, 1]
 def nn_analysis(tokens):
-    return 1.0;
+    return 0.0;
 
 # which return a keras neural model(not compiled)
 def construct_model(vocab_size, embed_dim, low, high):
