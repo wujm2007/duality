@@ -18,7 +18,8 @@ def produce():
         if(not command_q.empty()):
             send_all(command_q.get());
         else:
-            send_all(b'0.0'); # which sends a default value
+            pass;
+            #send_all(b'0.0'); # which sends a default value
 
 
 
@@ -31,7 +32,7 @@ def send_all(data):
 
 def consume():
     while(not comment_q.empty()):
-        comment_q.put(generate(command_q.get()));
+        command_q.put(generate(comment_q.get()));
 
 
 class MyTCPHandler(socketserver.BaseRequestHandler):

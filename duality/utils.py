@@ -17,7 +17,7 @@ def util_dump(obj, path):
 # data should be in a byte array format
 # addr should be a string that represents the target address
 def push_bev(addr, data):
-    tcp_skt=socket.socket(socket.AF_INET, socket.SOCK_STREAM);
-    tcp_skt.connect((addr, PORT));
-    tcp_skt.send(data);
-    tcp_skt.close();
+    print(data);
+    udp_skt=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_skt.sendto(data, (addr, PORT));
+    udp_skt.close();
