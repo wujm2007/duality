@@ -17,7 +17,8 @@ setup(name='duality',
           'python-Levenshtein',
           'tensorflow',
           'keras',
-          'pandas'
+          'pandas',
+          'pycurl'
       ],
       zip_safe=False
 )

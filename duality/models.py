@@ -395,9 +395,11 @@ if(__name__=='__main__'):
 
 
 
-    for doc in docs:
+    for i, doc in enumerate(docs):
         value, commands=doc_eval(doc, nlp, analyzer, stop_words, normal, inversed, replace_rule);
+        print("==========================BEGIN TEST %d=====================" %(i));
         print('Sentence: %s' % (doc));
         print('Sentiment Value: %f' % (value));
         print(commands);
         print('Vocabulary Size: %d' %(len(normal)))
+        print("==========================BEGIN TEST %d=====================" %(i));
