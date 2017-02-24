@@ -1,0 +1,43 @@
+Vi. & Phrases
+Emoji:
+1. smile
+2. cry
+3. be angry
+4. close eyes
+5. smell something
+6. make faces
+7. speak something [which may be looped according to the length of the response]
+
+Activity:
+1. give a hug
+2. turn left|right
+3. walk forward| backward  => stop (stop at the current position)
+4. jump
+5. sit down => stand up (be seated until be told to stand up)
+6. squat down => stand up (the same as 5))
+7. touch something upside (a fixed degree is enough)
+8. touch something downside
+9. kick something
+10. let something go
+
+
+( Note: since it is a demo, only 7), 8), 9), 10) would bring actual physical effects
+ [1] if be told to touch something, then catch it in hand until be told to let it go
+ [2] if be told to kick something,  then impact a proper force to the SOMETHING
+ [3] if be told to let something go, then the SOMETHING fall down and roll away to an arbitrary position
+)
+
+
+
+Vt.
+1. sing [song name]  (the song will then be played)
+2. dance by [song name] (the same)
+
+
+( About `Goal`
+  The case 'kicking the ball' again, miku cannot understand kicking the ball, which is not bound to some animation.
+  The audiences then properly air 'walk' & 'stop' alternatively and finally a 'kick'.
+
+  The Goal may be determined by the server and then presented to the end users as a Task. As long as a goal is finished,
+   next goal will be ready to be dispatched.
+)
