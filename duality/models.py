@@ -41,7 +41,7 @@ import Levenshtein as leven
 
 
 
-from .nn_model import nn_analysis
+# from .nn_model import nn_analysis
 from .context import DIR
 from .utils import util_dump, util_load
 
@@ -214,7 +214,7 @@ Although a markov chain model can be choosen, a rnn is more powerful to capture 
 @param: a spacy english instance
 @param: analyzer, a vader analyzer instance
 """
-def doc_eval(doc, nlp, analyzer, stop_words, normal, inversed, replace_rule):
+def doc_eval(doc, nlp, analyzer, stop_words=None, normal=None, inversed=None, replace_rule=None):
     components= list();
     commands=list();
     _doc= nlp(doc);
@@ -241,19 +241,19 @@ Evaluation process for a single sentence, which has been roughly cleaned and cla
 @param:
 
 """
-def sent_eval(sent, nlp, analyzer, stop_words, normal, inversed, replace_rule, alpha=0.1):
+def sent_eval(sent, nlp, analyzer, stop_words, normal, inversed, replace_rule, alpha=1.0):
     # deep clean done here
     lexicon_values = analyzer.polarity_scores(sent);
-    ml_values= _sent_eval(semantic_clean(sent, nlp, stop_words), normal, inversed, replace_rule);
-    print('Lexicon: %f' % (lexicon_values['compound']));
-    print('Neural: %f' % (ml_values));
-    return (alpha*lexicon_values['compound']+(1.0-alpha)*ml_values);
+    # ml_values= _sent_eval(semantic_clean(sent, nlp, stop_words), normal, inversed, replace_rule);
+    # print('Lexicon: %f' % (lexicon_values['compound']));
+    # print('Neural: %f' % (ml_values));
+    return lexicon_values['compound'];
 
 
 
 
 """
-@param: tokens, deep cleaned
+@param: tokens, deep cleaned [deprecated]
 """
 def _sent_eval(tokens, normal, inversed, replace_rule):
     outcome = final_clean(tokens, normal, inversed, replace_rule);
@@ -372,10 +372,10 @@ if(__name__=='__main__'):
     # test_set=util_load(os.path.join(DIR, TEST_PICK));
 
 
-    train_set=util_load(os.path.join(DIR, NORM_TRAIN_PICK));
-    test_set=util_load(os.path.join(DIR, NORM_TEST_PICK));
+    # train_set=util_load(os.path.join(DIR, NORM_TRAIN_PICK));
+    # test_set=util_load(os.path.join(DIR, NORM_TEST_PICK));
 
-    print(len(train_set['x']));
+    # print(len(train_set['x']));
 
     ######################## this part for building vocabulary on the training set(Never try it on your own machine, which takes a really long time) ##############
     # a global vocabulary
@@ -383,9 +383,9 @@ if(__name__=='__main__'):
     # normal_mapping, inversed_mapping = create_mapping(vocabulary);
     ######################## this part for building vocabulary on the training set ###################
 
-    replace_rule= util_load(os.path.join(DIR, REP_RULE_PICK));
-    normal= util_load(os.path.join(DIR, NORMAL_MAP_PICK));
-    inversed= util_load(os.path.join(DIR, INVERSE_MAP_PICK));
+    # replace_rule= util_load(os.path.join(DIR, REP_RULE_PICK));
+    # normal= util_load(os.path.join(DIR, NORMAL_MAP_PICK));
+    # inversed= util_load(os.path.join(DIR, INVERSE_MAP_PICK));
 
     # rearranged_test_set = rearrange(test_set, nlp, stop_words, normal, inversed, replace_rule);
     # util_dump(rearranged_test_set, os.path.join(DIR, NORM_TEST_PICK));
@@ -396,10 +396,10 @@ if(__name__=='__main__'):
 
 
     for i, doc in enumerate(docs):
-        value, commands=doc_eval(doc, nlp, analyzer, stop_words, normal, inversed, replace_rule);
+        value, commands=doc_eval(doc, nlp, analyzer);
         print("==========================BEGIN TEST %d=====================" %(i));
         print('Sentence: %s' % (doc));
         print('Sentiment Value: %f' % (value));
         print(commands);
-        print('Vocabulary Size: %d' %(len(normal)))
+        # print('Vocabulary Size: %d' %(len(normal)))
         print("==========================BEGIN TEST %d=====================" %(i));

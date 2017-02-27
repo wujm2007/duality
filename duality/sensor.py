@@ -1,5 +1,5 @@
 # this file invokes baidu's RESTful api to do recognition of the speech
-
+# this part has already been done at the client ends
 
 import pycurl
 import io

@@ -1,5 +1,8 @@
 # which is a neural network model for the sentiment evaluation, which based on a deeply cleaned token list
 
+
+
+# deprecated
 # begin crafting the neural models
 
 # in order to represent a meaningful model, a lower-level framework should be used
@@ -41,6 +44,10 @@ from .context import DIR
 def nn_analysis(tokens):
     return 0.0;
 
+
+
+
+# this model not finished right now
 # which return a keras neural model(not compiled)
 def construct_model(vocab_size, embed_dim, low, high):
     # always low=3, high=7
