@@ -52,8 +52,6 @@ class POSTHandler(http_server.BaseHTTPRequestHandler):
         self.send_head()
         comment_q.put(self.data)
         client_pool.add(self.address_string())
-        # just send back the same data, but upper-cased
-        client_pool.add(self.request.getpeername()[0])
         # you should always send the new bev data to all the client in the pool, where a server has been started
 
     def send_head(self):
